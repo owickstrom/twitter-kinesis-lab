@@ -1,0 +1,15 @@
+html {
+    font-family: sans-serif;
+}
+
+ul {
+    list-style-type: none;
+}
+
+li span {
+    font-weight: bold;
+}
+
+li span:after {
+    content: ': ';
+}
