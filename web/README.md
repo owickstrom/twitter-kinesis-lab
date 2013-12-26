@@ -1,6 +1,6 @@
-# twitter-hashtags-visualizer
+# Web Visualizer
 
-FIXME
+Shows the most popular hashtags in a nice way.
 
 ## Prerequisites
 
@@ -16,4 +16,4 @@ To start a web server for the application, run:
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 MIT
