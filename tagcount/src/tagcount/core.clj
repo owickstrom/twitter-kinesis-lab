@@ -1,5 +1,7 @@
 (ns tagcount.core
-  (:use amazonica.aws.kinesis))
+  (:require [amazonica.aws.kinesis :refer [worker!]]
+            [clj-time.core :refer [now minus minutes]]
+            [clj-time.coerce :refer [to-date]]))
 
 (defn append-timestamp [state event]
   (let [timestamps (get state (:tag event) [])]
@@ -9,14 +11,12 @@
   (println (take k (sort-by (fn [[key c]] (- c)) (map (fn [[key v]] [key (count v)]) state))))
   state)
 
-(defn date-minutes-ago [minutes]
-  (let [c (java.util.Calendar/getInstance)]
-    (.add c java.util.Calendar/MINUTE (- minutes))
-    (.getTime c)))
+(defn date-minutes-ago [n]
+  (to-date (minus (now) (minutes n))))
 
 (defn keep-newer [state limit]
-  (into {} (map 
-             (fn [[tag timestamps]] 
+  (into {} (map
+             (fn [[tag timestamps]]
                [tag (filter (fn [t] (.before limit t)) timestamps)])
              state)))
 
@@ -39,4 +39,3 @@
 (defn -main
   [& argv]
     (do-something))
-

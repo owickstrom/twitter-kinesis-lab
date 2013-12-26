@@ -6,4 +6,4 @@
   :main tagcount.core
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [amazonica "0.2.0"]
-                 ])
+                 [clj-time "0.6.0"]])
