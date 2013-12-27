@@ -11,6 +11,7 @@
                         [ring-mock "0.1.5"]
                         [hiccup "1.0.4"]
                         [amazonica "0.2.0"]
+                        [cheshire "5.3.0"]
                         [environ "0.4.0"]
                         [org.clojure/java.jdbc "0.3.0"]
                         [postgresql "9.1-901-1.jdbc4"]

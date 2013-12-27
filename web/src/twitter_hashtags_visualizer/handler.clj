@@ -2,8 +2,9 @@
   (:require [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
+            [cheshire.core :as json]
             [amazonica.aws.dynamodbv2 :as dynamo]
-            [hiccup.page :refer [html5 include-css]]
+            [hiccup.page :refer [html5 include-css include-js]]
             [environ.core :refer [env]]
             [clojure.java.jdbc :as jdbc])
   (:import com.mchange.v2.c3p0.ComboPooledDataSource))
@@ -31,7 +32,8 @@
 (def tags (atom {}))
 
 (defn query-top-tags []
-  {"apor" 23 "monkeys" 18 "stuff" 1})
+  (let [tags ["monkey" "cat" "horse" "pig" "football" "hockey" "skating" "golf"]]
+    (map #(hash-map :tag % :count (rand-int 10)) tags)))
 
 (defn update-tags []
   (swap! tags (fn [_] (query-top-tags))))
@@ -45,19 +47,28 @@
   (println "Polling each 5 seconds")
   (.start (Thread. poll-db)))
 
-(defn tags-template [tags]
+(defn json-response [data & [status]]
+  {:status (or status 200)
+   :headers {"Content-Type" "application/json"
+             "Cache-Control" "public, max-age=0, nocache"}
+   :body (json/generate-string data)})
+
+(defn page []
   (let [title "Popular Twitter Tags"]
     (html5
       [:head
         [:title title]
-        (include-css "main.css")]
+        (include-css "main.css")
+        (include-js "http://code.jquery.com/jquery-2.0.3.min.js"
+                    "http://underscorejs.org/underscore.js"
+                    "tags.js")]
       [:body
         [:h1 title]
-        [:ul
-          (for [[tag count] tags] [:li [:span tag] count])]])))
+        [:div {:class "tags-container"}]])))
 
 (defroutes app-routes
-  (GET "/" [] (tags-template @tags))
+  (GET "/" [] (page))
+  (GET "/tags" [] (json-response @tags))
   (route/resources "/")
   (route/not-found "Not Found"))
 

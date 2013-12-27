@@ -1,15 +1,46 @@
 html {
-    font-family: sans-serif;
+    font-family: monospace;
 }
 
-ul {
-    list-style-type: none;
+
+h1 {
+    display: inline-block;
+    background: #333;
+    padding: .5rem;
+    margin: 0;
+    font-weight: 400;
+    font-size: 100%;
+    color: #fff;
 }
 
-li span {
-    font-weight: bold;
+.tags-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
 }
 
-li span:after {
-    content: ': ';
+.tags {
+    position: relative;
+    height: 6rem;
+    margin-left: 2000px;
+    font-size: 600%;
+    white-space: nowrap;
+    text-align: center;
+    color: #069;
+
+    transition: color 2s, opacity 2s, transform 2s, margin-left 1s;
+    -webkit-transition: color 2s, opacity 2s, -webkit-transform 2s, margin-left 1s;
+}
+
+.tags.removed {
+    position: absolute;
+    color: #333;
+    opacity: 0;
+    transform: translate3d(0, -200px, -200px);
+    -webkit-transform: translate3d(0, -200px, -200px);
+}
+
+.tags span {
+    margin: 0 1rem;
+    line-height: 1rem;
 }
