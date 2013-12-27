@@ -10,7 +10,8 @@
             [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]])
   (:import twitter.callbacks.protocols.AsyncStreamingCallback
-           com.amazonaws.services.kinesis.model.ResourceInUseException)
+           com.amazonaws.services.kinesis.model.ResourceInUseException
+           java.util.Locale)
   (:gen-class))
 
 (def my-creds (oauth/make-oauth-creds (env :consumer-key)
@@ -56,8 +57,11 @@
         ;; see https://dev.twitter.com/docs/tweet-entities
         hashtags (get-in tweet [:entities :hashtags])
         date-str (:created_at tweet)
+        formatter (format/with-locale
+                    (format/formatter "EEE MMM dd HH:mm:ss Z yyyy")
+                    Locale/ENGLISH)
         date (when date-str
-               (to-date (format/parse (format/formatter "EEE MMM dd HH:mm:ss Z yyyy") date-str)))]
+               (to-date (format/parse formatter date-str)))]
     (doseq [hashtag (mapv :text hashtags)]
       (let [data {:created-at date
                   :tag hashtag}]
