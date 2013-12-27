@@ -32,12 +32,12 @@
 (def tags (atom {}))
 
 (defn query-top-tags []
-  (take 10 (jdbc/query pooled-db-spec 
+  (take 10 (jdbc/query pooled-db-spec
                        ["select * from tag_count where valid_to > current_timestamp"]
                        :row-fn #(select-keys % [:tag :count]))))
 
 (defn update-tags []
-  (swap! tags (fn [_] (query-top-tags))))
+  (reset! tags (query-top-tags)))
 
 (defn poll-db []
   (update-tags)
@@ -75,32 +75,3 @@
 
 (def app
   (handler/site app-routes))
-
-(defn -main [& args]
-  (try
-    (println)
-    (println "creating table")
-    (jdbc/db-do-commands
-     pooled-db-spec
-     (jdbc/create-table-ddl :fruit
-                            [:name "varchar(32)" "PRIMARY KEY"]
-                            [:price :int]))
-    (println "inserting fruit"
-             (jdbc/insert! pooled-db-spec :fruit {:name "apple" :price 120}))
-    (println (jdbc/query pooled-db-spec ["SELECT * FROM fruit WHERE price > ? ORDER BY price" 100]))
-    (println "updating price"
-             (jdbc/update! pooled-db-spec :fruit {:name "apple" :price 122} ["name = ?" "apple"]))
-    (println (jdbc/query pooled-db-spec ["SELECT * FROM fruit WHERE price > ? ORDER BY price" 100]))
-    (println "deleting fruit"
-             (jdbc/delete! pooled-db-spec :fruit ["name = ?" "apple"]))
-    (println (jdbc/query pooled-db-spec ["SELECT * FROM fruit WHERE price > ? ORDER BY price" 100]))
-    (finally
-      (println "dropping table")
-      (jdbc/db-do-commands
-       pooled-db-spec
-       (jdbc/drop-table-ddl :fruit)))))
-
-(comment
-  ;; for testing
-  (-main)
-  )
