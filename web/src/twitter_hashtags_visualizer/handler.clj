@@ -33,7 +33,11 @@
 
 (defn query-top-tags []
   (take 10 (jdbc/query pooled-db-spec
-                       ["select * from tag_count where valid_to > current_timestamp"]
+                       ["
+SELECT * FROM tag_count
+ WHERE valid_to > CURRENT_TIMESTAMP - INTERVAL '75 minutes'
+ ORDER BY count DESC
+ LIMIT 10"]
                        :row-fn #(select-keys % [:tag :count]))))
 
 (defn update-tags []
