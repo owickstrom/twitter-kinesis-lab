@@ -9,7 +9,8 @@
                  [org.slf4j/slf4j-log4j12 "1.7.5"]
                  [org.clojure/tools.logging "0.2.6"]
                  [amazonica "0.2.0"]
-                 [clj-time "0.6.0"]]
+                 [clj-time "0.6.0"]
+                 [environ "0.4.0"]]
   :main ^:skip-aot twitter-producer.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

@@ -7,15 +7,16 @@
             [clojure.tools.logging :refer [info error]]
             [amazonica.aws.kinesis :as kinesis]
             [clj-time.format :as format]
-            [clj-time.coerce :refer [to-date]])
+            [clj-time.coerce :refer [to-date]]
+            [environ.core :refer [env]])
   (:import twitter.callbacks.protocols.AsyncStreamingCallback
            com.amazonaws.services.kinesis.model.ResourceInUseException)
   (:gen-class))
 
-(def my-creds (oauth/make-oauth-creds "vbdFTliSzmnZowIhIn3Ww"
-                                "u8jfFVmcGI7FRg7bisxIoIo1qCQHqnDIezAsMuuE"
-                                "14907286-y6QYSNaOHaI3SeApcXDc8OrBUZ3W8FKaSutayVn9S"
-                                "zup0zrZ8T1m3oMIRObI7UxfevLoJ5fYSQarqvxY0pGDsM"))
+(def my-creds (oauth/make-oauth-creds (env :consumer-key)
+                                      (env :consumer-secret)
+                                      (env :access-token)
+                                      (env :access-token-secret)))
 
 (def ^:dynamic *stream-name* "Twitter")
 
@@ -27,12 +28,11 @@
         stream-names (set (:stream-names streams))]
     (if (stream-names stream-name)
       (do                               ;stream exists, check status
+        (info "Kinesis stream" stream-name "exists, checking status...")
         (let [stream (kinesis/describe-stream stream-name)
               status (get-in stream [:stream-description :stream-status])]
           (case status
-            ;; all is well
-            "ACTIVE" :created
-            ;; wait until active
+            "ACTIVE" (info "Kinesis stream" stream-name "is active")
             "CREATING" (do (info "Stream" stream-name "is in status CREATING, waiting until it's done")
                            (Thread/sleep 5000)
                            (recur stream-name))
