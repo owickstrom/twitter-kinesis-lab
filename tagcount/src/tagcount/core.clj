@@ -1,7 +1,6 @@
 (ns tagcount.core
   (:require [amazonica.aws.kinesis :refer [worker!]]
-            [clj-time.core :refer [now minus minutes]]
-            [clj-time.coerce :refer [to-date]]
+            [clojure.tools.logging :refer [info error]]
             [environ.core :refer [env]]
             [clojure.java.jdbc :as jdbc])
   (:import com.mchange.v2.c3p0.ComboPooledDataSource))
@@ -26,69 +25,80 @@
 
 (def pooled-db-spec (pool db-spec))
 
-(defn append-timestamp [state event]
-  (let [timestamps (get state (:tag event) [])]
-    (assoc state (:tag event) (conj timestamps (:created-at event)))))
+(def
+  ^{:doc "upsert: update a record if it already exists, or insert a new record
+ if it does not - all in a single statement"}
+  upsert
+  "WITH upsert AS
+   (UPDATE tag_count
+     SET count=count+1,
+         valid_to=?
+     WHERE tag=?
+     RETURNING *)
+   INSERT INTO tag_count (tag, count, valid_to)
+    SELECT ?, 1, ?
+    WHERE NOT EXISTS
+    (SELECT * FROM upsert);")
 
-(defn display-top [state k]
-  (println (take k (sort-by (fn [[key c]] (- c)) (map (fn [[key v]] [key (count v)]) state))))
-  state)
+(defn process-records [records]
+  (doseq [record records]
+    (let [data (:data record)
+          tag (:tag data)
+          timestamp (java.sql.Timestamp. (.getTime (:created-at data)))]
+      (info "Saving to db:" data)
+      (try
+        (jdbc/execute! pooled-db-spec
+                       [upsert timestamp tag tag timestamp])
+        (catch java.sql.SQLException e
+          (error (.getNextException e))
+          (throw e))))))
 
-(defn date-minutes-ago [n]
-  (to-date (minus (now) (minutes n))))
-
-(defn keep-newer [state limit]
-  (into {} (map
-            (fn [[tag timestamps]]
-              [tag (filter (fn [t] (.before limit t)) timestamps)])
-            state)))
-
-(defn handle-event [state event]
-  (let [old-timestamp (date-minutes-ago 75)]
-    (-> state
-      (append-timestamp event)
-      (keep-newer old-timestamp)
-      (display-top 10))))
-
-(defn do-something []
+(defn start-worker []
   (let [state (atom {})]
     (worker! :app "TwitterAnalyzer"
              :stream "Twitter"
-             :processor (fn [records]
-                          (doseq [row records]
-                            (println (:data row))
-                            (swap! state handle-event (:data row)))))))
+             :processor process-records)))
 
 (defn -main
   [& argv]
-    (do-something))
+    (start-worker))
 
 ;; example on using clojure.jdbc 0.3.0 api
+
+(def test-upsert
+  "WITH upsert AS
+   (UPDATE spider_count SET tally=tally+1
+    WHERE date='today' AND
+          spider='Googlebot'
+    RETURNING *)
+   INSERT INTO spider_count (spider, tally)
+    SELECT 'Googlebot', 1
+     WHERE NOT EXISTS (SELECT * FROM upsert)")
+
 (defn test-jdbc []
   (try
     (println)
+    (println "dropping table")
+    (jdbc/db-do-commands
+     pooled-db-spec
+     (jdbc/drop-table-ddl :spider_count))
     (println "creating table")
     (jdbc/db-do-commands
      pooled-db-spec
-     (jdbc/create-table-ddl :berries
-                            [:name "varchar(32)" "PRIMARY KEY"]
-                            [:price :int]))
-    (println "inserting berries"
-             (jdbc/insert! pooled-db-spec :berries {:name "strawberries" :price 150})
-             (jdbc/insert! pooled-db-spec :berries {:name "blackberries" :price 170})
-             (jdbc/insert! pooled-db-spec :berries {:name "raspberries" :price 120}))
-    (println (jdbc/query pooled-db-spec ["SELECT * FROM berries WHERE price > ? ORDER BY price" 120]))
-    (println "updating price"
-             (jdbc/update! pooled-db-spec :berries {:price 122} ["name = ?" "raspberries"]))
-    (println (jdbc/query pooled-db-spec ["SELECT * FROM berries WHERE price > ? ORDER BY price" 120]))
-    (println "deleting strawberries"
-             (jdbc/delete! pooled-db-spec :berries ["name = ?" "strawberries"]))
-    (println (jdbc/query pooled-db-spec ["SELECT * FROM berries WHERE price > ? ORDER BY price" 120]))
+     (jdbc/create-table-ddl :spider_count
+                            [:date :date "NOT NULL" "DEFAULT NOW()"]
+                            [:spider :varchar "NOT NULL"]
+                            [:tally :int "NOT NULL" "DEFAULT 0"]))
+    (println "upserting"
+             (jdbc/execute! pooled-db-spec [test-upsert])
+             (jdbc/execute! pooled-db-spec [test-upsert])
+             (jdbc/execute! pooled-db-spec [test-upsert]))
+    (println (jdbc/query pooled-db-spec ["SELECT * FROM spider_count"]))
     (finally
       (println "dropping table")
       (jdbc/db-do-commands
        pooled-db-spec
-       (jdbc/drop-table-ddl :berries)))))
+       (jdbc/drop-table-ddl :spider_count)))))
 
 (comment
   (test-jdbc)
