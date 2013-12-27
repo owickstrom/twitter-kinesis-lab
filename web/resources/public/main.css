@@ -17,6 +17,10 @@ h1 {
     position: absolute;
     top: 50%;
     left: 50%;
+    perspective: 500px;
+    -webkit-perspective: 500px;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
 }
 
 .tags {
@@ -28,19 +32,23 @@ h1 {
     text-align: center;
     color: #069;
 
-    transition: color 2s, opacity 2s, transform 2s, margin-left 1s;
-    -webkit-transition: color 2s, opacity 2s, -webkit-transform 2s, margin-left 1s;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+
+    transition: all 1s;
+    -webkit-transition: all 1s;
 }
 
 .tags.removed {
+    margin-left: 0;
     position: absolute;
     color: #333;
     opacity: 0;
-    transform: translate3d(0, -200px, -200px);
-    -webkit-transform: translate3d(0, -200px, -200px);
+    transform: translate3d(-1000px, 0, -200px);
+    -webkit-transform: translate3d(-1000px, 0, -200px);
 }
 
 .tags span {
-    margin: 0 1rem;
+    margin: 0 .6em;
     line-height: 1rem;
 }

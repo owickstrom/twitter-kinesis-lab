@@ -59,17 +59,17 @@ $(function () {
     }
 
     function refreshTags() {
-        setTimeout(function () {
-            var $tags = $('.tags');
+        var $tags = $('.tags');
 
-            if ($tags.length > 0) {
-                $tags.addClass('removed');
-                setTimeout(function () {
-                    $tags.remove();
-                }, 2000);
-            }
-            addNewTags(refreshTags);
-        }, 1000);
+        if ($tags.length > 0) {
+            $tags.addClass('removed');
+            setTimeout(function () {
+                $tags.remove();
+            }, 2000);
+        }
+        addNewTags(function () {
+            setTimeout(refreshTags, 5000);
+        });
     }
     refreshTags();
 });
