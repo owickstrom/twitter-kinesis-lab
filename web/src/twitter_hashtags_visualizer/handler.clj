@@ -54,22 +54,22 @@ SELECT * FROM tag_count
 
 (defn json-response [data & [status]]
   {:status (or status 200)
-   :headers {"Content-Type" "application/json"
+   :headers {"Content-Type" "application/json; charset=UTF-8"
              "Cache-Control" "public, max-age=0, nocache"}
    :body (json/generate-string data)})
 
 (defn page []
   (let [title "Popular Twitter Tags"]
     (html5
-      [:head
-        [:title title]
-        (include-css "main.css")
-        (include-js "http://code.jquery.com/jquery-2.0.3.min.js"
-                    "http://underscorejs.org/underscore.js"
-                    "tags.js")]
-      [:body
-        [:h1 title]
-        [:div {:class "tags-container"}]])))
+     [:head
+      [:title title]
+      (include-css "main.css")
+      (include-js "http://code.jquery.com/jquery-2.0.3.min.js"
+                  "http://underscorejs.org/underscore.js"
+                  "tags.js")]
+     [:body
+      [:h1 title]
+      [:div {:class "tags-container"}]])))
 
 (defroutes app-routes
   (GET "/" [] (page))
