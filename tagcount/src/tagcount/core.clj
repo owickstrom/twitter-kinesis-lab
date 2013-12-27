@@ -16,9 +16,9 @@
 
 (defn keep-newer [state limit]
   (into {} (map
-             (fn [[tag timestamps]]
-               [tag (filter (fn [t] (.before limit t)) timestamps)])
-             state)))
+            (fn [[tag timestamps]]
+              [tag (filter (fn [t] (.before limit t)) timestamps)])
+            state)))
 
 (defn handle-event [state event]
   (let [old-timestamp (date-minutes-ago 75)]
@@ -29,10 +29,10 @@
 
 (defn do-something []
   (let [state (atom {})]
-    (worker! :app "jan-testar"
-	            :stream "Twitter"
-	            :processor (fn [records]
-	                         (doseq [row records]
+    (worker! :app "TwitterAnalyzer"
+             :stream "Twitter"
+             :processor (fn [records]
+                          (doseq [row records]
                             (println (:data row))
                             (swap! state handle-event (:data row)))))))
 
