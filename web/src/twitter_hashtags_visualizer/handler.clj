@@ -32,8 +32,9 @@
 (def tags (atom {}))
 
 (defn query-top-tags []
-  (let [tags ["monkey" "cat" "horse" "pig" "football" "hockey" "skating" "golf"]]
-    (map #(hash-map :tag % :count (rand-int 10)) tags)))
+  (take 10 (jdbc/query pooled-db-spec 
+                       ["select * from tag_count where valid_to > current_timestamp"]
+                       :row-fn #(select-keys % [:tag :count]))))
 
 (defn update-tags []
   (swap! tags (fn [_] (query-top-tags))))
