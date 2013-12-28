@@ -79,10 +79,12 @@
    ;; just print exceptions to the console when there's an exception
    handlers/exception-print))
 
+(defn start []
+    (streaming/statuses-sample :oauth-creds my-creds
+                               :callbacks async-streaming-callback))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (create-stream *stream-name*)
-  (streaming/statuses-sample :oauth-creds my-creds
-                             :callbacks async-streaming-callback
-                             :params {:stall-warnings "true"}))
+  (start))
