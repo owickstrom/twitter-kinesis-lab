@@ -6,6 +6,7 @@
   :main tagcount.core
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [amazonica "0.2.0"]
+                 [clj-time "0.6.0"]
                  [environ "0.4.0"]
                  [org.clojure/java.jdbc "0.3.0"]
                  [postgresql "9.1-901-1.jdbc4"]
