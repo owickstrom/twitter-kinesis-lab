@@ -17,8 +17,8 @@
       (jdbc/db-do-commands core/pooled-db-spec
                            (jdbc/create-table-ddl
                              :tag_count
-                             [:tag "varchar(50)" "PRIMARY KEY"]
-                             [:count "int" "NOT NULL"]
+                             [:tag "varchar(140)" "PRIMARY KEY"]
+                             [:count "int" "NOT NULL" "DEFAULT 0"]
                              [:valid_to "timestamptz" "NOT NULL"])))
     (println "Table tag_count already exists.")))
 
