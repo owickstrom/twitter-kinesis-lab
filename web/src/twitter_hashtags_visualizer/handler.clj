@@ -3,7 +3,6 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             [cheshire.core :as json]
-            [amazonica.aws.dynamodbv2 :as dynamo]
             [hiccup.page :refer [html5 include-css include-js]]
             [environ.core :refer [env]]
             [clojure.java.jdbc :as jdbc])
