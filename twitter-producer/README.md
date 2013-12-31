@@ -13,7 +13,23 @@ Build a stand-alone executable jar like this:
 
     $ lein uberjar
 
+Also, a few properties need to be set, containing credentials for the Twitter
+Streaming API and Amazon Kinesis. One way of doing this is to create a file
+called `credentials`, which is "sourced" before the application is started:
+
+	export AWS_ACCESS_KEY_ID=AKIAJQSAKJ4HJEXAMPLE
+	export AWS_SECRET_KEY=somesecretawskey
+	export AWS_REGION=us-east-1
+	export CONSUMER_KEY=somekey
+	export CONSUMER_SECRET=somesecretagain
+	export ACCESS_TOKEN=12345678-AbcDeFGh
+	export ACCESS_TOKEN_SECRET=somemumbojumbo
+
 ## Usage
+
+First, source the credentials file:
+
+	. credentials
 
 The utility can be run either from Leiningen or as a stand-alone jar:
 
@@ -21,21 +37,3 @@ The utility can be run either from Leiningen or as a stand-alone jar:
 
     $ java -jar twitter-producer-<VERSION>-standalone.jar [args]
 
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-## License
-
-Copyright © 2013 Ulrik Sandberg
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
