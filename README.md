@@ -38,7 +38,7 @@ Common to all three applications is the use of the `environ` library to read var
 In order to run this system, there are a few things that need to be in place:
 
 * The AWS account owner must subscribe to Amazon Kinesis, in the us-east-1 region.
-* Create an IaM user, say `twitter-kiesis`, with an access key but no password, giving it the following policies:
+* Create an IaM user, say `twitter-kinesis`, with an access key but no password, giving it the following policies:
 	* full Kinesis access
 	* full DynamoDB access (the Kinesis client library needs this)
 	* full CloudWatch access (the Kinesis client library needs this)
