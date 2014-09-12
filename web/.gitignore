@@ -9,4 +9,4 @@ pom.xml.asc
 /.lein-*
 /.nrepl-port
 *.swp
-credentials
+profiles.clj

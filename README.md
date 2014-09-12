@@ -37,19 +37,28 @@ Common to all three applications is the use of the `environ` library to read var
 ## Preparations
 In order to run this system, there are a few things that need to be in place:
 
-* The AWS account owner must subscribe to Amazon Kinesis, in the us-east-1 region.
+* The AWS account owner must subscribe to Amazon Kinesis, in the eu-west-1 region.
 * Create an IaM user, say `twitter-kinesis`, with an access key but no password, giving it the following policies:
 	* full Kinesis access
 	* full DynamoDB access (the Kinesis client library needs this)
 	* full CloudWatch access (the Kinesis client library needs this)
-* Add the IaM access key credentials to your local `credentials` file in both `twitter-producer` and `tagcount`
-* Create a [Twitter application](https://dev.twitter.com/apps) and generate OAuth tokens; add those to the `credentials` file in `twitter-producer`
-* Create a PostgreSQL RDS instance in us-east-1 region (same as Kinesis); use smallest size and type
+* Add the IaM access key credentials to your local `profiles.clj` file, according to instructions in each `README.md` in `twitter-producer`, `tagcount`, and `web`.
+* Create a [Twitter application](https://dev.twitter.com/apps) and generate OAuth tokens; add those to the `profiles.clj` file in `twitter-producer`
+* Create a PostgreSQL RDS instance in eu-west-1 region (same as Kinesis); use size 5GB and type t1.micro (t2.micro requires a VPC, so it could be somewhat more involved to set up if you don't have a default VPC)
 * Open the RDS security group for the IPs/security groups for the `tagcount` and `web` applications
+* Open the RDS security group for your own IP, if you want to access it via `psql`
 * Run the `migration.clj` file in `tagcount` to initialize the database; `lein run -m tagcount.migration`
+
+## Running
+
+Start the modules in reverse order, ie first `web`, then `tagcount`, and finally, when the stream is in state `ACTIVE`, `twitter-producer`.
+
+## Caveats
+
+As of today, 2014-09-13, amazonica doesn't support passing a region name to the Kinesis worker, indicating where to create DynamoDB tables. This means the tables will be created in `us-east-1` for now. However, the underlying Kinesis client library supports region as of version 1.1.0. The code in `tagcount` has been prepared, so when amazonica gets patched, everything should work automatically and the table should be created in eu-west-1, as the other resources.
 
 ## License
 
-Copyright © 2013 Ulrik Sandberg, Jan Kronquist, Oskar Wickström
+Copyright © 2013-2014 Ulrik Sandberg, Jan Kronquist, Oskar Wickström
 
 Distributed under the Eclipse Public License, the same as Clojure.

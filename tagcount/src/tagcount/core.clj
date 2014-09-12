@@ -7,6 +7,12 @@
             [clojure.java.jdbc :as jdbc])
   (:import com.mchange.v2.c3p0.ComboPooledDataSource))
 
+(def ^:dynamic *stream-name* "Twitter")
+
+(def ^:dynamic *kinesis-uri* "https://kinesis.eu-west-1.amazonaws.com")
+
+(def ^:dynamic *region* "eu-west-1")
+
 (def state (atom {}))
 
 (defn pool [spec]
@@ -28,6 +34,10 @@
               :password (env :db-password)})
 
 (def pooled-db-spec (pool db-spec))
+
+(def cred {:access-key (env :aws-access-key-id)
+           :secret-key (env :aws-secret-key)
+           :endpoint (env :aws-region)})
 
 (def
   ^{:doc "upsert: update a record if it already exists, or insert a new record
@@ -85,9 +95,15 @@
           (throw e))))))
 
 (defn start-worker []
-  (worker! :app "TwitterAnalyzer"
-           :stream "Twitter"
+  (info "Starting worker")
+  (worker! :credentials cred
+           :endpoint *kinesis-uri*
+           :region-name *region*
+           :app "TwitterAnalyzer"
+           :stream *stream-name*
            :processor process-records))
+
+#_(amazonica.aws.kinesis/describe-stream cred "Twitter")
 
 (defn -main
   [& argv]

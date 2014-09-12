@@ -3,37 +3,97 @@
 Reads the Twitter streaming API, extracts the hashtags and the created_date,
 and posts that data to a Kinesis stream, using the hashtag as the partition
 key. This enables a Kinesis application to perform things like counting the
-most popular hashtags during a certain time window.
+most popular hashtags during a sliding time window.
 
 ## Installation
 
 Make sure [Leiningen 2+](http://leiningen.org/) is installed.
 
+## Usage
+
+A few properties need to be set, containing an AWS access key with permissions
+for Amazon Kinesis and OAuth credentials for the Twitter Streaming API:
+
+* AWS access key, eg `AKIAJQSAKJ4HJEXAMPLE`
+* AWS secret key, eg `somesecretawskey`
+* AWS region, eg `eu-west-1`
+* Twitter API consumer key, eg `somekey`
+* Twitter API consumer secret, eg `somesecretagain`
+* Twitter API access token, eg `12345678-AbcDeFGh`
+* Twitter API access token secret, eg `somemumbojumbo`
+
+We're using a utility called [environ][1] to be able to handle properties in the
+same way, code-wise, whether we are in development, test, or production.
+
+[1]: https://github.com/weavejester/environ
+
+### Development
+
+During development, the application is run from Leiningen:
+
+    $ lein run
+
+In order to have the necessary properties available during development, place
+them in a file called `profiles.clj`, which should look like:
+
+    {:dev {:env {:aws-access-key-id "AKIAJQSAKJ4HJEXAMPLE"
+                 :aws-secret-key "somesecretawskey"
+                 :aws-region "eu-west-1"
+                 :consumer-key "somekey"
+                 :consumer-secret "somesecretagain"
+                 :access-token "12345678-AbcDeFGh"
+                 :access-token-secret "somemumbojumbo"}}}
+
+NOTE: Make sure you don't accidentally add `profiles.clj` to source control.
+
+The `:dev` profile will be used when running `lein run` or `lein repl`.
+LightTable or other IDEs that have Leiningen integration can also be used.
+
+If a `:test` environment is available, it will be used when running `lein test`
+(should there be any tests that require any of these properties):
+
+    {:dev {:env {:aws-access-key-id "AKIAJQSAKJ4HJEXAMPLE"
+                 :aws-secret-key "somesecretawskey"
+                 :aws-region "eu-west-1"
+                 :consumer-key "somekey"
+                 :consumer-secret "somesecretagain"
+                 :access-token "12345678-AbcDeFGh"
+                 :access-token-secret "somemumbojumbo"}}
+     :test {:env {:aws-access-key-id "AKIAJQSAKJ4HJEXAMPLE"
+                  :aws-secret-key "somesecretawskey"
+                  :aws-region "eu-west-1"
+                  :consumer-key "somekey"
+                  :consumer-secret "somesecretagain"
+                  :access-token "12345678-AbcDeFGh"
+                  :access-token-secret "somemumbojumbo"}}}
+
+### Production
+
 Build a stand-alone executable jar like this:
 
     $ lein uberjar
 
-Also, a few properties need to be set, containing credentials for the Twitter
-Streaming API and Amazon Kinesis. One way of doing this is to create a file
-called `credentials`, which is "sourced" before the application is started:
+In production, the settings need to be available through other means than the
+`profiles.clj` file. One way is environment variables:
 
-	export AWS_ACCESS_KEY_ID=AKIAJQSAKJ4HJEXAMPLE
-	export AWS_SECRET_KEY=somesecretawskey
-	export AWS_REGION=us-east-1
-	export CONSUMER_KEY=somekey
-	export CONSUMER_SECRET=somesecretagain
-	export ACCESS_TOKEN=12345678-AbcDeFGh
-	export ACCESS_TOKEN_SECRET=somemumbojumbo
+    $ AWS_ACCESS_KEY_ID=AKIAJQSAKJ4HJEXAMPLE ... java -jar twitter-producer-<VERSION>-standalone.jar
 
-## Usage
+Another way is Java system properties:
 
-First, source the credentials file:
+    $ java -Daws.access.key.id=AKIAJQSAKJ4HJEXAMPLE ... -jar twitter-producer-<VERSION>-standalone.jar
 
-	. credentials
+Of course, the variables can also be placed in a file which is sourced before
+running:
 
-The utility can be run either from Leiningen or as a stand-alone jar:
+    $ cat credentials
+    export AWS_ACCESS_KEY_ID=AKIAJQSAKJ4HJEXAMPLE
+    export AWS_SECRET_KEY=somesecretawskey
+    export AWS_REGION=us-east-1
+    export CONSUMER_KEY=somekey
+    export CONSUMER_SECRET=somesecretagain
+    export ACCESS_TOKEN=12345678-AbcDeFGh
+    export ACCESS_TOKEN_SECRET=somemumbojumbo
 
-    $ lein run -- [args]
+    $ . credentials
 
-    $ java -jar twitter-producer-<VERSION>-standalone.jar [args]
-
+    $ java -jar twitter-producer-<VERSION>-standalone.jar

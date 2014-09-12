@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [clojure.tools.logging :refer [info error]]
             [amazonica.aws.kinesis :as kinesis]
+            [amazonica.core :refer [defcredential]]
             [clj-time.format :as format]
             [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]])
@@ -14,14 +15,19 @@
            java.util.Locale)
   (:gen-class))
 
+;; keep track of incomplete bodyparts
+(def body (atom nil))
+
 (def my-creds (oauth/make-oauth-creds (env :consumer-key)
                                       (env :consumer-secret)
                                       (env :access-token)
                                       (env :access-token-secret)))
 
+(defcredential (env :aws-access-key-id) (env :aws-secret-key) (env :aws-region))
+
 (def ^:dynamic *stream-name* "Twitter")
 
-(def ^:dynamic *kinesis-uri* "https://kinesis.us-east-1.amazonaws.com")
+(def ^:dynamic *kinesis-uri* "https://kinesis.eu-west-1.amazonaws.com")
 
 ;; make sure we have a working stream
 (defn create-stream [stream-name]
@@ -47,14 +53,18 @@
           (catch ResourceInUseException e
             (error "Stream" stream-name "already exists, somebody got in between")))))))
 
-(defn on-bodypart
-  "A streaming on-bodypart handler.
-    baos is a ByteArrayOutputStream.  (str baos) is the response body (encoded as JSON).
-    This handler will print the expanded media URL of Tweets that have media."
-  [response baos]
-  ;; parse the tweet (true means convert to keyword keys)
-  (let [tweet (json/parse-string (str baos) true)
-        ;; see https://dev.twitter.com/docs/tweet-entities
+#_(kinesis/describe-stream "Twitter")
+
+(defn- handle-hashtag [date hashtag]
+  (let [data {:created-at date
+              :tag hashtag}]
+    (info "Posting to Kinesis:" data)
+    (kinesis/put-record *stream-name*
+                        data
+                        hashtag)))
+
+(defn- handle-tweet [tweet]
+  (let [;; see https://dev.twitter.com/docs/tweet-entities
         hashtags (get-in tweet [:entities :hashtags])
         date-str (:created_at tweet)
         formatter (format/with-locale
@@ -62,13 +72,21 @@
                     Locale/ENGLISH)
         date (when date-str
                (to-date (format/parse formatter date-str)))]
+
     (doseq [hashtag (mapv :text hashtags)]
-      (let [data {:created-at date
-                  :tag hashtag}]
-        (info "Posting to Kinesis:" data)
-        (kinesis/put-record *stream-name*
-                            data
-                            hashtag)))))
+      (handle-hashtag date hashtag))))
+
+(defn on-bodypart
+  "A streaming on-bodypart handler.
+    baos is a ByteArrayOutputStream. (str baos) is the response body (encoded as JSON)."
+  [response baos]
+  (let [bodypart (str baos)]
+    (try
+      (swap! body str bodypart)
+      (handle-tweet (json/parse-string @body true))
+      (reset! body nil)
+      (catch Exception e
+        #_(info "Incomplete tweet, waiting for next chunk\n" bodypart)))))
 
 (def async-streaming-callback
   (AsyncStreamingCallback.
@@ -86,5 +104,10 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (create-stream *stream-name*)
-  (start))
+  (let [stream (create-stream *stream-name*)
+        data (meta stream)]
+
+    (try
+      (start)
+      (catch Exception e
+        ((:cancel data))))))

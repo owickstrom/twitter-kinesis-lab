@@ -3,14 +3,15 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [twitter-api "0.7.4"]
-                 [cheshire "5.3.0"]
-                 [org.slf4j/slf4j-log4j12 "1.7.5"]
-                 [org.clojure/tools.logging "0.2.6"]
-                 [amazonica "0.2.0"]
-                 [clj-time "0.6.0"]
-                 [environ "0.4.0"]]
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [twitter-api "0.7.6"]
+                 [cheshire "5.3.1"]
+                 [org.slf4j/slf4j-log4j12 "1.7.7"]
+                 [org.clojure/tools.logging "0.3.0"]
+                 [amazonica "0.2.24"]
+                 [clj-time "0.8.0"]
+                 [environ "1.0.0"]]
+  :plugins [[lein-environ "1.0.0"]]
   :main ^:skip-aot twitter-producer.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
