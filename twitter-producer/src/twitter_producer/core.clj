@@ -45,10 +45,12 @@
       (do                               ;no stream, create it
         (info "Creating Kinesis stream" stream-name)
         (try
-          (kinesis/create-stream stream-name 1)
+          (kinesis/create-stream stream-name 2)
           (catch ResourceInUseException e
             (error "Stream" stream-name "already exists, somebody got in between")
-            (System/exit 2)))))))
+            (System/exit 2)))
+        (Thread/sleep 5000)
+        (recur stream-name)))))
 
 #_(kinesis/describe-stream "Twitter")
 
@@ -99,6 +101,6 @@
           (handle-tweet tweet))
         (recur)))
     (catch Exception e
-      (error "A problem occurred when retrieving tweets" (.getMessage e))
+      (error "A problem occurred when retrieving tweets:" (.getMessage e))
       (cleanup)
       (System/exit 1))))
