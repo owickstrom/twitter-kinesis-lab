@@ -1,6 +1,6 @@
 (ns tagcount.core
   (:require [amazonica.aws.kinesis :refer [worker!]]
-            [clojure.tools.logging :refer [info error]]
+            [clojure.tools.logging :refer [debug info error]]
             [clj-time.core :refer [now minus minutes]]
             [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]]
@@ -9,9 +9,9 @@
 
 (def ^:dynamic *stream-name* "Twitter")
 
-(def ^:dynamic *kinesis-uri* "https://kinesis.eu-west-1.amazonaws.com")
-
 (def ^:dynamic *region* "eu-west-1")
+
+(def ^:dynamic *kinesis-uri* "https://kinesis.eu-west-1.amazonaws.com")
 
 (def state (atom {}))
 
@@ -81,10 +81,10 @@
     (let [data (:data record)
           tag (:tag data)
           valid-to (java.sql.Timestamp. (.getTime (:created-at data)))
-          _ (info "Calculating sliding window:" data)
+          _ (debug "Calculating sliding window:" data)
           new-state (swap! state handle-event data)
           count (-> new-state (get tag) count)]
-      (info "Saving to db:" tag "has count" count)
+      (info "Saving to db:" tag "has count" count "at" valid-to)
       (try
         (jdbc/execute! pooled-db-spec
                        [upsert
@@ -94,17 +94,18 @@
           (error (.getNextException e))
           (throw e))))))
 
-(defn start-worker []
-  (info "Starting worker")
-  (worker! :credentials cred
-           :endpoint *kinesis-uri*
-           :region-name *region*
-           :app "TwitterAnalyzer"
-           :stream *stream-name*
-           :processor process-records))
+(defn start-workers [n]
+  (dotimes [i n]
+    (let [uuid (worker! :credentials cred
+                        :region-name *region*
+                        :endpoint *kinesis-uri*
+                        :app "TwitterAnalyzer"
+                        :stream *stream-name*
+                        :processor process-records)]
+      (info "Started worker" i "with uuid" uuid))))
 
 #_(amazonica.aws.kinesis/describe-stream cred "Twitter")
 
-(defn -main
-  [& argv]
-    (start-worker))
+(defn -main [& args]
+  (let [workers ((fnil #(Integer/parseInt %) 4) (first args))]
+    (start-workers workers)))

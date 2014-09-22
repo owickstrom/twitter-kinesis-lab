@@ -88,7 +88,6 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (info "Twitter stream is" ())
   (client/start-twitter-stream twitter-stream)
   (.addShutdownHook (Runtime/getRuntime) (Thread. cleanup))
   (try
