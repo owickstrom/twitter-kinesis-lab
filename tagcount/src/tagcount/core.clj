@@ -84,7 +84,7 @@
           _ (debug "Calculating sliding window:" data)
           new-state (swap! state handle-event data)
           count (-> new-state (get tag) count)]
-      (info "Saving to db:" tag "has count" count "at" valid-to)
+      (info (.getName (Thread/currentThread)) "Saving to db:" tag "has count" count "at" valid-to)
       (try
         (jdbc/execute! pooled-db-spec
                        [upsert
@@ -107,5 +107,5 @@
 #_(amazonica.aws.kinesis/describe-stream cred "Twitter")
 
 (defn -main [& args]
-  (let [workers ((fnil #(Integer/parseInt %) 4) (first args))]
+  (let [workers ((fnil #(Integer/parseInt %) "2") (first args))]
     (start-workers workers)))
