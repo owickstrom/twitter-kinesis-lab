@@ -84,8 +84,10 @@
 (defn cleanup []
   (info "Cancelling the Twitter stream")
   (client/cancel-twitter-stream twitter-stream)
-  (info "Note that Kinesis stream" (-> kinesis-stream :stream-description :stream-arn)
-        "still exists"))
+  (when kinesis-stream
+    (info "Note that Kinesis stream"
+          (-> kinesis-stream :stream-description :stream-arn)
+          "still exists")))
 
 (defn -main
   "I don't do a whole lot ... yet."
