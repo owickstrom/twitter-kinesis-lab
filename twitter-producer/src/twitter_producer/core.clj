@@ -45,14 +45,12 @@
       (do                               ;no stream, create it
         (info "Creating Kinesis stream" stream-name)
         (try
-          (kinesis/create-stream stream-name 2)
+          (kinesis/create-stream stream-name 1)
           (catch ResourceInUseException e
             (error "Stream" stream-name "already exists, somebody got in between")
             (System/exit 2)))
         (Thread/sleep 5000)
         (recur stream-name)))))
-
-#_(kinesis/describe-stream "Twitter")
 
 (defn- handle-hashtag [date hashtag]
   (let [data {:created-at date
@@ -86,7 +84,7 @@
   (client/cancel-twitter-stream twitter-stream)
   (when kinesis-stream
     (info "Note that Kinesis stream"
-          (-> kinesis-stream :stream-description :stream-arn)
+          (get-in kinesis-stream [:stream-description :stream-arn])
           "still exists")))
 
 (defn -main
