@@ -104,8 +104,6 @@
                         :processor process-records)]
       (info "Started worker" i "with uuid" uuid))))
 
-#_(amazonica.aws.kinesis/describe-stream cred "Twitter")
-
 (defn -main [& args]
-  (let [workers ((fnil #(Integer/parseInt %) "2") (first args))]
+  (let [workers ((fnil #(Integer/parseInt %) "1") (first args))]
     (start-workers workers)))
