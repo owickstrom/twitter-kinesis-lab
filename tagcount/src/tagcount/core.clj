@@ -105,5 +105,5 @@
       (info "Started worker" i "with uuid" uuid))))
 
 (defn -main [& args]
-  (let [workers ((fnil #(Integer/parseInt %) "1") (first args))]
+  (let [workers (Integer/parseInt (or (first args) "1"))]
     (start-workers workers)))
