@@ -1,3 +1,6 @@
+*, *:before, *:after {
+  box-sizing: inherit;
+}
 html {
   font-family: monospace;
 }
@@ -19,10 +22,11 @@ h1 {
 
 .tags {
   position: absolute;
-  width: 100%;
-  padding; 0 3rem;
+  left: 0;
+  right: 0;
+  padding: 3rem;
   color: #069;
-  font-size: 300%;
+  font-size: 400%;
 
   transition: opacity .8s, transform .8s;
   -webkit-transition: opacity .8s, -webkit-transform .8s;
