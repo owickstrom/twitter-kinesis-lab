@@ -44,11 +44,11 @@ SELECT * FROM tag_count
 
 (defn poll-db []
   (update-tags)
-  (Thread/sleep 5000)
+  (Thread/sleep 15000)
   (poll-db))
 
 (defn start-polling []
-  (println "Polling each 5 seconds")
+  (println "Polling each 15 seconds")
   (.start (Thread. poll-db)))
 
 (defn json-response [data & [status]]
