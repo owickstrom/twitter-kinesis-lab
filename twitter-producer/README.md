@@ -29,9 +29,30 @@ same way, code-wise, whether we are in development, test, or production.
 
 ### Development
 
-During development, the application is run from Leiningen:
+During development, the application is run from Leiningen like this:
 
-    $ lein run
+    $ lein trampoline run
+
+The `trampoline` thing simply kills the Leiningen JVM after the application has
+started, thus "un-consuming" lots of memory.
+
+Some parameters are required, so you will get a printout that looks like this:
+
+    Some options are required
+
+    This is the twitter-producer application, that gets tweets off the Twitter
+    Streaming API, parses the Twitter hashtags, and posts each hashtag to the given
+    Kinesis stream with a timestamp, sharding on the hashtag. A Kinesis client
+    application downstream can then perform calculations on that data, for example
+    sliding window counts.
+
+    You must specify a Kinesis stream where to post the hashtags. That would perhaps
+    be Hashtags-<teamname>. The stream will be created if not already existing.
+
+    Usage: twitter-producer [-h] [-k N] -s STREAMNAME
+      -s, --stream STREAMNAME     Kinesis stream name (required)
+      -k, --shards N           1  Number of Kinesis shards; each 1000 writes/s and 5 reads/s
+      -h, --help
 
 In order to have the necessary properties available during development, place
 them in a file called `profiles.clj`, which should look like:

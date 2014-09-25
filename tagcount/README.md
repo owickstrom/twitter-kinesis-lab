@@ -32,7 +32,27 @@ same way, code-wise, whether we are in development, test, or production.
 
 During development, the application is run from Leiningen:
 
-    $ lein run
+    $ lein trampoline run
+
+The `trampoline` thing simply kills the Leiningen JVM after the application has
+started, thus "un-consuming" lots of memory.
+
+Some parameters are required, so you will get a printout that looks like this:
+
+    Some options are required
+
+    This is the tagcount application, that keeps a sliding window count of
+    the Twitter hashtags retrieved from the given Kinesis stream.
+
+    You must specify a Kinesis application name that is unique for the AWS account and region,
+    like TwitterTrends-<teamname>. You must also tell tagcount the name of the Kinesis stream
+    where to find the hashtags. That would perhaps be Hashtags-<teamname>.
+
+    Usage: tagcount [-wh] -a APPNAME -s STREAMNAME
+      -a, --application APPNAME     Kinesis application name; names DDB table (required)
+      -s, --stream STREAMNAME       Kinesis stream name (required)
+      -w, --workers N            1  Number of parallel Kinesis workers; <= # of Kinesis shards
+      -h, --help
 
 In order to have the necessary properties available during development, place
 them in a file called `profiles.clj`, which should look like:
