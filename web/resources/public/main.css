@@ -1,50 +1,42 @@
 html {
-    font-family: monospace;
+  font-family: monospace;
 }
 
 
 h1 {
-    display: inline-block;
-    background: #333;
-    padding: .5rem;
-    margin: 0;
-    font-weight: 400;
-    font-size: 100%;
-    color: #fff;
+  display: inline-block;
+  background: #333;
+  padding: .5rem;
+  margin: 0;
+  font-weight: 400;
+  font-size: 100%;
+  color: #fff;
 }
 
 .tags-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    perspective: 500px;
-    -webkit-perspective: 500px;
-    transform-style: preserve-3d;
-    -webkit-transform-style: preserve-3d;
+  width: 100%;
 }
 
 .tags {
-    position: relative;
-    height: 6rem;
-    font-size: 3vw;
-    white-space: nowrap;
-    text-align: center;
-    color: #069;
+  position: absolute;
+  width: 100%;
+  padding; 0 3rem;
+  color: #069;
+  font-size: 300%;
 
-    transition: opacity .8s, transform .8s;
-    -webkit-transition: opacity .8s, -webkit-transform .8s;
+  transition: opacity .8s, transform .8s;
+  -webkit-transition: opacity .8s, -webkit-transform .8s;
 }
 
 .tags.removed {
-    position: absolute;
-    color: #333;
-    opacity: 0;
+  color: #333;
+  opacity: 0;
 
-    transform: translateY(-3rem);
-    -webkit-transform: translateY(-3rem);
+  transform: translateY(-3rem);
+  -webkit-transform: translateY(-3rem);
 }
 
 .tags span {
-    margin: 0 .6em;
-    line-height: 1rem;
+  display: inline-block;
+  margin: 0 .6em 0 0;
 }

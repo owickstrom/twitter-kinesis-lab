@@ -43,8 +43,10 @@ $(function () {
             $tags.addClass('tags');
             var elements = _.each(sorted, function (e) {
                 $tag = $('<span>');
-                $tag.css('opacity', e.count / maxCount);
-                $tag.css('font-size', (e.count / maxCount * 100) + '%');
+                var opacity = (e.count / maxCount + 0.5) /2;
+                $tag.css('opacity', opacity);
+                var size = (e.count / maxCount * 100 + 100) / 2;
+                $tag.css('font-size', size + '%');
                 $tag.text(e.tag);
                 $tags.append($tag);
             });
@@ -52,7 +54,7 @@ $(function () {
 
             // Center the tags.
             var halfTagsWidth = $tags.outerWidth() / 2;
-            $tags.css('margin-left', '-' + halfTagsWidth + 'px');
+            //$tags.css('margin-left', '-' + halfTagsWidth + 'px');
 
             cb();
         });
