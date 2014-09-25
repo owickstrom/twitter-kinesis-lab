@@ -11,7 +11,7 @@ function middleSortBy(coll, comparator) {
     if (_.isEmpty(coll)) {
         return [];
     }
-    var sorted = _.sortBy(coll, comparator);    
+    var sorted = _.sortBy(coll, comparator);
     var high = _.last(sorted);
     var rest = _.initial(sorted);
 
@@ -70,7 +70,7 @@ $(function () {
             }, 2000);
         }
         addNewTags(function () {
-            setTimeout(refreshTags, 5000);
+            setTimeout(refreshTags, 15000);
         });
     }
     refreshTags();
