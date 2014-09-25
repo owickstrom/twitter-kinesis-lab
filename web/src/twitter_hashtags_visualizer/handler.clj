@@ -44,7 +44,7 @@ SELECT * FROM tag_count
 
 (defn poll-db []
   (update-tags)
-  (Thread/sleep 5000)
+  (Thread/sleep 15000)
   (poll-db))
 
 (defn start-polling []
