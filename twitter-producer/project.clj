@@ -8,7 +8,6 @@
                   :exclusions [org.apache.httpcomponents/httpclient
                                org.apache.httpcomponents/httpcore]]
                  [cheshire "5.3.1"]
-                 [org.slf4j/slf4j-log4j12 "1.7.7"]
 
                  ;; twitter-streaming-client wants 1.7.5 of these, no way dude
                  [org.slf4j/slf4j-api "1.7.7"]
@@ -17,6 +16,7 @@
                  [org.slf4j/log4j-over-slf4j "1.7.7"]
 
                  [org.clojure/tools.logging "0.3.1"]
+                 [org.clojure/tools.cli "0.3.1"]
                  [amazonica "0.2.25"
                   :exclusions [commons-codec joda-time]]
                  [clj-time "0.8.0"]

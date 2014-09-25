@@ -4,10 +4,10 @@
             [clj-time.core :refer [now minus minutes]]
             [clj-time.coerce :refer [to-date]]
             [environ.core :refer [env]]
-            [clojure.java.jdbc :as jdbc])
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as string]
+            [clojure.tools.cli :refer [parse-opts]])
   (:import com.mchange.v2.c3p0.ComboPooledDataSource))
-
-(def ^:dynamic *stream-name* "Twitter")
 
 (def ^:dynamic *region* "eu-west-1")
 
@@ -94,16 +94,57 @@
           (error (.getNextException e))
           (throw e))))))
 
-(defn start-workers [n]
-  (dotimes [i n]
+(defn start-workers [options]
+  (dotimes [i (:workers options)]
     (let [uuid (worker! :credentials cred
                         :region-name *region*
                         :endpoint *kinesis-uri*
-                        :app "TwitterAnalyzer"
-                        :stream *stream-name*
+                        :app (:application options)
+                        :stream (:stream options)
                         :processor process-records)]
       (info "Started worker" i "with uuid" uuid))))
 
+;; command line stuff
+
+(def cli-options
+  [["-a" "--application APPNAME" "Kinesis application name; names DDB table (required)"]
+   ["-s" "--stream STREAMNAME" "Kinesis stream name (required)"]
+   ["-w" "--workers N" "Number of parallel Kinesis workers; <= # of Kinesis shards"
+    :default 1
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 17) "Must be a number between 1 and 16, because ... I say so"]]
+   ["-h" "--help"]])
+
+(defn usage [options-summary]
+  (->> [""
+        "This is the tagcount application, that keeps a sliding window count of"
+        "the Twitter hashtags retrieved from the given Kinesis stream."
+        ""
+        "You must specify a Kinesis application name that is unique for the AWS account and region,"
+        "like TwitterTrends-<teamname>. You must also tell tagcount the name of the Kinesis stream"
+        "where to find the hashtags. That would perhaps be Hashtags-<teamname>."
+        ""
+        "Usage: tagcount [-wh] -a APPNAME -s STREAMNAME"
+        options-summary]
+       (string/join \newline)))
+
+(defn error-msg [errors]
+  (str "The following errors occurred while parsing your command:\n\n"
+       (string/join \newline errors)))
+
+(defn exit [status msg]
+  (println msg)
+  (System/exit status))
+
 (defn -main [& args]
-  (let [workers (Integer/parseInt (or (first args) "1"))]
-    (start-workers workers)))
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+    ;; Handle help and error conditions
+    (cond
+     (:help options) (exit 0 (usage summary))
+     (not
+      (and
+       (:stream options)
+       (:application options))) (exit 1 (str \newline "Some options are required"
+                                             \newline (usage summary)))
+     errors (exit 1 (error-msg errors)))
+    (start-workers options)))

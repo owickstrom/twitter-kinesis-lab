@@ -11,5 +11,6 @@
   </root>
 
   <logger name="twitter-streaming-client.impl" level="error" />
+  <logger name="ch.qos.logback" level="warn" />
   <logger name="twitter_producer" level="debug" />
 </configuration>

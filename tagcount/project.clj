@@ -11,6 +11,7 @@
                  [ch.qos.logback/logback-classic "1.1.2"]
                  [org.clojure/java.jdbc "0.3.5"]
                  [org.clojure/tools.logging "0.3.1"]
+                 [org.clojure/tools.cli "0.3.1"]
                  [postgresql "9.3-1102.jdbc41"]
                  [com.mchange/c3p0 "0.9.2.1"]]
   :plugins [[lein-environ "1.0.0"]])
