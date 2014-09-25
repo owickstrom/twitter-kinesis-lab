@@ -26,26 +26,22 @@ h1 {
 .tags {
     position: relative;
     height: 6rem;
-    margin-left: 2000px;
-    font-size: 600%;
+    font-size: 3vw;
     white-space: nowrap;
     text-align: center;
     color: #069;
 
-    transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-
-    transition: all 1s;
-    -webkit-transition: all 1s;
+    transition: opacity .8s, transform .8s;
+    -webkit-transition: opacity .8s, -webkit-transform .8s;
 }
 
 .tags.removed {
-    margin-left: 0;
     position: absolute;
     color: #333;
     opacity: 0;
-    transform: translate3d(-1000px, 0, -200px);
-    -webkit-transform: translate3d(-1000px, 0, -200px);
+
+    transform: translateY(-3rem);
+    -webkit-transform: translateY(-3rem);
 }
 
 .tags span {
