@@ -71,7 +71,7 @@ used for communicating with the database.
 The `web` application provides the user interface. It regularly selects from the
 PostgreSQL database the `n` tags with the highest count, and renders an animated tag
 cloud in the browser. The library `clojure.java.jdbc` is again used for communicating
-with the database. JQuery and Underscore.js are used in the web client to create a
+with the database. ReactJS, Underscore.js, and browser-request.js are used in the web client to create a
 simple tag cloud.
 
 ## Credentials
