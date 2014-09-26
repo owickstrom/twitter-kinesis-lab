@@ -63,12 +63,13 @@ SELECT * FROM tag_count
      [:head
       [:title title]
       (include-css "main.css")
-      (include-js "http://code.jquery.com/jquery-2.0.3.min.js"
-                  "http://underscorejs.org/underscore.js"
-                  "tags.js")]
+      (include-js "vendor/browser-request.js"
+                  "vendor/underscore.js"
+                  "vendor/JSXTransformer.js"
+                  "vendor/react.js")
+      [:script {:type "text/jsx" :src "tags.jsx"}]]
      [:body
-      [:h1 title]
-      [:div {:class "tags-container"}]])))
+      [:div {:id "container"}]])))
 
 (defroutes app-routes
   (GET "/" [] (page))
